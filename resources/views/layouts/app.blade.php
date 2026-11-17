@@ -20,30 +20,47 @@
 
 <header class="site-header"> 
 
-<nav class="container nav" aria-label="Navigasi utama"> 
+<nav class="container nav" aria-label="Navigasi utama">
+    <a class="brand" href="{{ route('shop.index') }}">
+        <span class="brand-mark" aria-hidden="true"></span>ruangbelanja<span style="color:#7aa487">.</span>
+    </a>
 
-<a class="brand" href="{{ route('shop.index') }}"> 
+    <div>
+        <a href="{{ route('shop.index') }}">Katalog</a>
+        @auth
+            @if(auth()->user()->role === 'customer')
+                @if(Route::has('cart.index'))
+                    <a href="{{ route('cart.index') }}">Keranjang</a>
+                @endif
+                @if(Route::has('orders.index'))
+                    <a href="{{ route('orders.index') }}" @if(request()->routeIs('orders.*')) aria-current="page" @endif>Pesanan</a>
+                @endif
+            @elseif(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.dashboard') }}">Dashboard Admin</a>
+            @endif
+            <span class="account">Halo, {{ auth()->user()->name }}</span>
+            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn-link">Keluar</button>
+            </form>
+        @else
+            <a href="{{ route('login') }}">Masuk</a>
+            <a class="btn" href="{{ route('register') }}">Daftar</a>
+        @endauth
+    </div>
+</nav>
+</header>
 
-<span class="brand-mark" aria-hidden="true">↗</span>ruangbelanja<span style="color:#7aa487">.</span></a><a href="{{ route('shop.index') }}" @if(request()->routeIs('shop.*')) aria-current="page" @endif>Jelajahi Produk</a> 
+<main class="container">
+    @yield('content')
+</main>
 
-@auth @if(auth()->user()->role==='customer')@if(Route::has('cart.index'))<a href="{{ route('cart.index') }}" @if(request()->routeIs('cart.*')) aria-current="page" @endif>Keranjang ({{ array_sum(session('cart',[])) }})</a>@endif 
+<footer class="container footer">
+    <strong>ruangbelanja.</strong>
+    <span>Proyek praktikum Laravel Admin & Pelanggan</span>
+    <span>Belanja dengan informasi yang jelas.</span>
+</footer>
 
-@if(Route::has('orders.index')) 
-
-<a href="{{ route('orders.index') }}" @if(request()->routeIs('orders.*')) aria-current="page" @endif>Pesanan</a>@endif 
-
-@else<a href="{{ route('admin.dashboard') }}">Dashboard Admin</a>@endif<span class="account">Halo, {{ auth()->user()->name }}</span><form method="POST" action="{{ route('logout') }}">@csrf<button class="btn-light">Keluar</button></form>@else<a href="{{ route('login') }}">Masuk</a><a class="btn" href="{{ route('register') }}">Daftar</a>@endauth</nav></header> 
-
-<main class="container">@include('layouts.flash') @yield('content')</main> 
-
-<footer class="container footer"><strong>ruangbelanja.</strong> 
-
-<span>Proyek praktikum Laravel · Admin & Pelanggan</span> 
-
-<span>Belanja dengan informasi yang jelas.</span></footer> 
-
-<script src="{{ asset('js/store.js') }}" defer></script> 
-
-</body> 
-
-</html> 
+<script src="{{ asset('js/store.js') }}" defer></script>
+</body>
+</html>

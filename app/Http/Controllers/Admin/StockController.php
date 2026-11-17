@@ -33,26 +33,30 @@ class StockController extends Controller
         return view('admin.stock.create', ['products' => Product::orderBy('name')->get()]); 
     } 
  
-    public function store(StoreStockInRequest $request): RedirectResponse 
-    { 
-        DB::transaction(function () use ($request) { 
+   public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'qty' => 'required|integer|min:1', 
+            'reference' => 'nullable|string|max:255',
+        ]);
+
+        DB::transaction(function () use ($request) {
             $product = Product::whereKey($request->integer('product_id'))->lockForUpdate()->firstOrFail(); 
-            $quantity = $request->integer('quantity'); 
- 
+            $quantity = $request->integer('qty'); 
+
             $product->increment('stock', $quantity); 
- 
+
             StockMovement::create([ 
                 'product_id' => $product->id, 
                 'user_id' => $request->user()->id, 
                 'type' => 'IN', 
                 'quantity' => $quantity, 
-                'unit_cost' => $request->input('unit_cost'), 
                 'reference' => $request->input('reference'), 
-                'note' => $request->input('note'), 
-                'movement_at' => $request->date('movement_at') ?? now(), 
+                'movement_at' => now(),
             ]); 
         }); 
- 
+
         return redirect()->route('admin.stock.index')->with('success', 'Barang masuk dicatat dan stok bertambah.'); 
-    } 
+    }
 } 

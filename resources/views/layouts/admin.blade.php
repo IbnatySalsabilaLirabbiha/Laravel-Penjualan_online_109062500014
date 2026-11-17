@@ -39,7 +39,6 @@
                 <span>{{ auth()->user()->name }} • Admin</span>
             </div>
 
-            @include('layouts.flash')
             @yield('content')
         </main>
     </div>
